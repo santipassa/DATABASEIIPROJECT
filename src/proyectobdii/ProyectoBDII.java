@@ -25,9 +25,9 @@ public class ProyectoBDII {
            
             DatabaseMetaData md = connection.getMetaData();
             
-            ResultSet rs = md.getProcedures(null, "RioCuartoCamping", null);
+            ResultSet rs = md.getImportedKeys(null, null, "Articulos_vendidos");
             while (rs.next()) {
-                System.out.println(rs.getString(3));
+                System.out.println(rs.getString(12));
             }
         } catch (Exception e) {
 

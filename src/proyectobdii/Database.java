@@ -14,10 +14,10 @@ import java.util.List;
  */
 public class Database {
 
-    String name;
-    Connection conection;
-    List<Table> tableList;
-    List<Procedure> procedureList;
+    private String name;
+    private Connection conection;
+    private List<Table> tableList;
+    private List<Procedure> procedureList;
 
     public Database(String host, String bd, String user, String pwd) {
         this.name = bd;
@@ -28,13 +28,13 @@ public class Database {
             tableList = new ArrayList<Table>();
             procedureList = new ArrayList<Procedure>();
             DatabaseMetaData md = conection.getMetaData();
-            ResultSet rs = md.getTables(null, null, "%", null);
+            ResultSet rs = md.getTables(null, null, bd, null);
             while (rs.next()) {
-                tableList.add(new Table(this,rs.getString(3)));
+                tableList.add(new Table(this,rs.getString("TABLE_NAME")));
             }
             rs = md.getProcedures(null, this.name, null);
             while (rs.next()) {
-                procedureList.add(new Procedure(rs.getString(3)));
+                procedureList.add(new Procedure(rs.getString("PROCEDURE_NAME")));
             }
             
             

@@ -5,14 +5,12 @@ package proyectobdii;
  *
  * @author santiago
  */
-class Trigger {
+class PrimaryKey {
     String name;
 
-    public Trigger(String name) {
+    public PrimaryKey(String name) {
         this.name = name;
     }
-    
-    
     
     
 }

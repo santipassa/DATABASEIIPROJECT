@@ -11,9 +11,15 @@ import java.util.List;
  *
  * @author santiago
  */
-class ForeignKeys {
+class ForeignKey {
     String name;
     List<Column> columns;
     Table references; 
+
+    public ForeignKey(String name) {
+        this.name = name;
+    }
+    
+    
     
 }
