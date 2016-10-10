@@ -26,33 +26,32 @@ class Table {
         this.triggerList = new ArrayList<>();
         try {
             DatabaseMetaData md = c.getConnection().getMetaData();
-            
-            
+
             ResultSet rs = md.getColumns(null, null, this.name, null);
-            // Get the columns names and types
+            // Get columns names and types
             while (rs.next()) {
                 this.columnList.add(new Column(rs.getString("COLUMN_NAME"), rs.getString("TYPE_NAME")));
             }
-            // Get the primary keys 
+            // Get primary keys 
             rs = md.getPrimaryKeys(null, c.getBd(), this.name);
             while (rs.next()) {
                 this.primaryKeyList.add(new PrimaryKey(rs.getString("COLUMN_NAME")));
             }
-            //Get the foreign keys
+            //Get foreign keys
             rs = md.getImportedKeys(null, c.getBd(), this.name);
             while (rs.next()) {
-                
+
                 String fk_name = rs.getString("FK_NAME");
-                
+
                 DBConnection dbc = new DBConnection(c.getHost(), "INFORMATION_SCHEMA", c.getUser(), c.getPwd());
-               
+
                 String sql = "SELECT COLUMN_NAME,REFERENCED_TABLE_NAME,REFERENCED_COLUMN_NAME FROM KEY_COLUMN_USAGE WHERE TABLE_SCHEMA=? AND TABLE_NAME=? and CONSTRAINT_NAME=?";
                 PreparedStatement query = dbc.getConnection().prepareStatement(sql);
                 query.setString(1, c.getBd());
                 query.setString(2, this.name);
                 query.setString(3, fk_name);
                 ResultSet key_column_usage = query.executeQuery();
-                 
+
                 if (key_column_usage.next()) {
                     String key = key_column_usage.getString("COLUMN_NAME");
                     String tableReferences = key_column_usage.getString("REFERENCED_TABLE_NAME");
@@ -63,10 +62,33 @@ class Table {
                 dbc.closeConnection();
 
             }
+            //get triggers
 
-        } catch (Exception e) {
+            DBConnection dbc = new DBConnection(c.getHost(), "INFORMATION_SCHEMA", c.getUser(), c.getPwd());
+
+            String sql = "SELECT TRIGGER_NAME,EVENT_MANIPULATION,ACTION_ORIENTATION,ACTION_TIMING FROM TRIGGERS WHERE TRIGGER_SCHEMA=? AND EVENT_OBJECT_TABLE=?";
             
+            PreparedStatement query = dbc.getConnection().prepareStatement(sql);
+            query.setString(1, c.getBd());
+            query.setString(2, this.name);
+            if(this.name.equals("Articulos")){
+                
+                System.out.println(query.toString());
+            
+            }
+            ResultSet triggers = query.executeQuery();
+            
+            while (triggers.next()) {
+                String tName = triggers.getString("TRIGGER_NAME");
+                String tEvent = triggers.getString("EVENT_MANIPULATION");
+                String tActionOrient = triggers.getString("ACTION_ORIENTATION");
+                String tActionTiming = triggers.getString("ACTION_TIMING");
+                triggerList.add(new Trigger(tName,tEvent,this.name,tActionOrient,tActionTiming));
 
+            }
+            dbc.closeConnection();
+        } catch (Exception e) {
+                System.out.println(e.toString());
         }
 
     }
@@ -147,25 +169,24 @@ class Table {
 
     @Override
     public String toString() {
-        String column="";
-        String trigger="";
-        String primaryKey="";
-        String foreignKey="";
+        String column = "";
+        String trigger = "";
+        String primaryKey = "";
+        String foreignKey = "";
         for (Column c : columnList) {
-            column=column+" "+c.toString();
+            column = column + " " + c.toString();
         }
         for (Trigger t : this.triggerList) {
-            trigger=t.toString()+" "+trigger;
+            
+            trigger = t.toString() + " " + trigger;
         }
         for (PrimaryKey p : this.primaryKeyList) {
-            primaryKey=p.toString()+" "+primaryKey;
+            primaryKey = p.toString() + " " + primaryKey;
         }
         for (ForeignKey f : this.foreignKeyList) {
-            foreignKey=f.toString()+" "+foreignKey;
+            foreignKey = f.toString() + " " + foreignKey;
         }
-        return "Table{" + "name=" + name + trigger+" "+primaryKey+" "+column+" "+foreignKey+'}';
+        return "Table{" + "name=" + name +" "+trigger + " " + primaryKey + " " + column + " " + foreignKey + '}';
     }
-
-    
 
 }

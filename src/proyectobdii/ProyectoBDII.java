@@ -17,7 +17,7 @@ public class ProyectoBDII {
      */
     public static void main(String[] args) throws SQLException, FileNotFoundException {
         Database rc = new Database();
-        rc.connect("localhost", "sys", "root", "root");
+        rc.connect("localhost", "RioCuartoCamping", "root", "root");
         
         
         System.out.println("tables: "+rc.getTableCount());
