@@ -1,96 +1,171 @@
-
 package proyectobdii;
 
 import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /**
  *
  * @author santiago
  */
 class Table {
-    Database database;
-    String name;
-    List<Column> columnList;
-    List<Trigger> triggerList;
-    List<ForeignKey> foreignKeyList;
-    List<PrimaryKey> primaryKeyList;
-    
 
-    public Table(Database d,String name) {
+    private String name;
+    private List<Column> columnList;
+    private List<Trigger> triggerList;
+    private List<ForeignKey> foreignKeyList;
+    private List<PrimaryKey> primaryKeyList;
+
+    public Table(DBConnection c, String name) {
         this.name = name;
-        this.database=d;
         this.columnList = new ArrayList<>();
         this.primaryKeyList = new ArrayList<>();
         this.foreignKeyList = new ArrayList<>();
-        try{
-            DatabaseMetaData md = this.database.getConection().getMetaData();
-            ResultSet rs = md.getColumns(null, null,this.name , null);
+        this.triggerList = new ArrayList<>();
+        try {
+            DatabaseMetaData md = c.getConnection().getMetaData();
+            
+            
+            ResultSet rs = md.getColumns(null, null, this.name, null);
             // Get the columns names and types
             while (rs.next()) {
-                this.columnList.add(new Column(rs.getString("COLUMN_NAME"),rs.getString("TYPE_NAME")));
+                this.columnList.add(new Column(rs.getString("COLUMN_NAME"), rs.getString("TYPE_NAME")));
             }
             // Get the primary keys 
-            rs = md.getPrimaryKeys(null, null, this.name);
-             while (rs.next()) {
+            rs = md.getPrimaryKeys(null, c.getBd(), this.name);
+            while (rs.next()) {
                 this.primaryKeyList.add(new PrimaryKey(rs.getString("COLUMN_NAME")));
             }
-             //Get the foreign keys
-             rs = md.getImportedKeys(null, null, this.name);
-             while (rs.next()) {
-                this.foreignKeyList.add(new ForeignKey(rs.getString("FK_NAME")));
+            //Get the foreign keys
+            rs = md.getImportedKeys(null, c.getBd(), this.name);
+            while (rs.next()) {
+                
+                String fk_name = rs.getString("FK_NAME");
+                
+                DBConnection dbc = new DBConnection(c.getHost(), "INFORMATION_SCHEMA", c.getUser(), c.getPwd());
+               
+                String sql = "SELECT COLUMN_NAME,REFERENCED_TABLE_NAME,REFERENCED_COLUMN_NAME FROM KEY_COLUMN_USAGE WHERE TABLE_SCHEMA=? AND TABLE_NAME=? and CONSTRAINT_NAME=?";
+                PreparedStatement query = dbc.getConnection().prepareStatement(sql);
+                query.setString(1, c.getBd());
+                query.setString(2, this.name);
+                query.setString(3, fk_name);
+                ResultSet key_column_usage = query.executeQuery();
+                 
+                if (key_column_usage.next()) {
+                    String key = key_column_usage.getString("COLUMN_NAME");
+                    String tableReferences = key_column_usage.getString("REFERENCED_TABLE_NAME");
+                    String referencesKey = key_column_usage.getString("REFERENCED_COLUMN_NAME");
+                    foreignKeyList.add(new ForeignKey(key, tableReferences, referencesKey));
+
+                }
+                dbc.closeConnection();
+
             }
+
+        } catch (Exception e) {
             
-        }catch(Exception e){
-        
-        
-        }  
-        
+
+        }
+
     }
-    //Hash code for tables
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public List<Column> getColumnList() {
+        return columnList;
+    }
+
+    public void setColumnList(List<Column> columnList) {
+        this.columnList = columnList;
+    }
+
+    public List<Trigger> getTriggerList() {
+        return triggerList;
+    }
+
+    public void setTriggerList(List<Trigger> triggerList) {
+        this.triggerList = triggerList;
+    }
+
+    public List<ForeignKey> getForeignKeyList() {
+        return foreignKeyList;
+    }
+
+    public void setForeignKeyList(List<ForeignKey> foreignKeyList) {
+        this.foreignKeyList = foreignKeyList;
+    }
+
+    public List<PrimaryKey> getPrimaryKeyList() {
+        return primaryKeyList;
+    }
+
+    public void setPrimaryKeyList(List<PrimaryKey> primaryKeyList) {
+        this.primaryKeyList = primaryKeyList;
+    }
+
+    public boolean equals(Table t) {
+        boolean result;
+        result = (this.name.equals(t.getName())) && (this.columnList.size() == t.getColumnList().size())
+                && (this.foreignKeyList.size() == t.getForeignKeyList().size())
+                && (this.primaryKeyList.size() == t.getPrimaryKeyList().size())
+                && (this.triggerList.size() == t.getTriggerList().size());
+        if (result) {
+            if (this.columnList.size() == t.getColumnList().size()) {
+                for (int i = 0; i < this.columnList.size(); i++) {
+                    result = this.columnList.get(i).equals(t.getColumnList().get(i)) && result;
+                }
+            }
+
+            if (this.foreignKeyList.size() == t.getForeignKeyList().size()) {
+                for (int i = 0; i < this.columnList.size(); i++) {
+                    result = this.foreignKeyList.get(i).equals(t.getForeignKeyList().get(i)) && result;
+                }
+            }
+
+            if (this.primaryKeyList.size() == t.getPrimaryKeyList().size()) {
+                for (int i = 0; i < this.columnList.size(); i++) {
+                    result = this.primaryKeyList.get(i).equals(t.getPrimaryKeyList().get(i)) && result;
+                }
+            }
+
+            if (this.triggerList.size() == t.getTriggerList().size()) {
+                for (int i = 0; i < this.columnList.size(); i++) {
+                    result = this.triggerList.get(i).equals(t.getTriggerList().get(i)) && result;
+                }
+            }
+        }
+        return result;
+    }
+
     @Override
-    public int hashCode() {
-        int hash = 3;
-        hash = 97 * hash + Objects.hashCode(this.name);
-        hash = 97 * hash + Objects.hashCode(this.columnList);
-        hash = 97 * hash + Objects.hashCode(this.triggerList);
-        hash = 97 * hash + Objects.hashCode(this.foreignKeyList);
-        hash = 97 * hash + Objects.hashCode(this.primaryKeyList);
-        return hash;
+    public String toString() {
+        String column="";
+        String trigger="";
+        String primaryKey="";
+        String foreignKey="";
+        for (Column c : columnList) {
+            column=column+" "+c.toString();
+        }
+        for (Trigger t : this.triggerList) {
+            trigger=t.toString()+" "+trigger;
+        }
+        for (PrimaryKey p : this.primaryKeyList) {
+            primaryKey=p.toString()+" "+primaryKey;
+        }
+        for (ForeignKey f : this.foreignKeyList) {
+            foreignKey=f.toString()+" "+foreignKey;
+        }
+        return "Table{" + "name=" + name + trigger+" "+primaryKey+" "+column+" "+foreignKey+'}';
     }
-    //Equals for tables
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final Table other = (Table) obj;
-        if (!Objects.equals(this.name, other.name)) {
-            return false;
-        }
-        if (!Objects.equals(this.columnList, other.columnList)) {
-            return false;
-        }
-        if (!Objects.equals(this.triggerList, other.triggerList)) {
-            return false;
-        }
-        if (!Objects.equals(this.foreignKeyList, other.foreignKeyList)) {
-            return false;
-        }
-        if (!Objects.equals(this.primaryKeyList, other.primaryKeyList)) {
-            return false;
-        }
-        return true;
-    }
+
     
-    
-    
-    
+
 }

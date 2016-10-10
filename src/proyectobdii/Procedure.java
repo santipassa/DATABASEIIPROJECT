@@ -1,44 +1,77 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package proyectobdii;
 
-import java.util.Objects;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
  * @author santiago
  */
 class Procedure {
-    String name;
 
-    public Procedure(String name) {
+    private String name;
+    private List<Param> paramList;
+
+    public Procedure(DBConnection c, String name) throws SQLException {
+        this.name = name;
+        this.paramList = new ArrayList<>();
+        //get the metadata from INFORMATION_SCHEMA database
+        DBConnection dbc = new DBConnection(c.getHost(), "INFORMATION_SCHEMA", c.getUser(), c.getPwd());
+        String sql = "SELECT PARAMETER_MODE,PARAMETER_NAME,DATA_TYPE FROM parameters WHERE SPECIFIC_SCHEMA=? AND SPECIFIC_NAME=?";
+        PreparedStatement query = dbc.getConnection().prepareStatement(sql);
+        query.setString(1, c.getBd());
+        query.setString(2, this.name);
+        ResultSet rs = query.executeQuery();
+        while (rs.next()) {
+
+            paramList.add(new Param(rs.getString("PARAMETER_NAME"), rs.getString("DATA_TYPE"), rs.getString("PARAMETER_MODE")));
+
+        }
+        dbc.closeConnection();
+
+    }
+
+    public boolean equals(Procedure p) {
+        boolean result;
+        result = this.name.equals(p.getName()) && (this.paramList.size() == p.getParamList().size());
+        if (result) {
+            if (this.paramList.size() == p.getParamList().size()) {
+                for (int i = 0; i < this.paramList.size(); i++) {
+                    result = this.paramList.get(i).equals(p.getParamList().get(i)) && result;
+                }
+            }
+        }
+
+        return result;
+
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
         this.name = name;
     }
 
-    @Override
-    public int hashCode() {
-        int hash = 3;
-        hash = 79 * hash + Objects.hashCode(this.name);
-        return hash;
+    public List<Param> getParamList() {
+        return paramList;
+    }
+
+    public void setParamList(List<Param> paramList) {
+        this.paramList = paramList;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
+    public String toString() {
+        String params="";
+        for(Param p : this.paramList){
+            params=params+" "+p.toString();
         }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final Procedure other = (Procedure) obj;
-        if (!Objects.equals(this.name, other.name)) {
-            return false;
-        }
-        return true;
+        return "Procedure{" + "name=" + name +" "+params+'}';
     }
-    
-    
+
 }

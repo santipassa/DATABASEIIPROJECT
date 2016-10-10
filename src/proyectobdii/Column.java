@@ -1,15 +1,13 @@
-
 package proyectobdii;
-
-import java.util.Objects;
 
 /**
  *
  * @author santiago
  */
 class Column {
-    String name;
-    String type;
+
+    private String name;
+    private String type;
 
     public Column(String name, String type) {
         this.name = name;
@@ -32,33 +30,13 @@ class Column {
         this.type = type;
     }
 
-    @Override
-    public int hashCode() {
-        int hash = 3;
-        hash = 13 * hash + Objects.hashCode(this.name);
-        hash = 13 * hash + Objects.hashCode(this.type);
-        return hash;
+    public boolean equals(Column c) {
+        return (this.name.equals(c.getName()) && this.type.equals(c.getType()));
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final Column other = (Column) obj;
-        if (!Objects.equals(this.name, other.name)) {
-            return false;
-        }
-        if (!Objects.equals(this.type, other.type)) {
-            return false;
-        }
-        return true;
+    public String toString() {
+        return "Column{" + "name=" + name + ", type=" + type + '}';
     }
-    
-    
-    
-    
+
 }

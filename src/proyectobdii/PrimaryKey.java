@@ -1,42 +1,36 @@
-
 package proyectobdii;
 
-import java.util.Objects;
 
 /**
  *
  * @author santiago
  */
 class PrimaryKey {
-    String name;
+    private String key;
+    
+    public PrimaryKey(String key) {
+        this.key=key;
+    
+    }
 
-    public PrimaryKey(String name) {
-        this.name = name;
+
+    public boolean equals(PrimaryKey k) {
+       return this.key.equals(k.getKey());
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
     }
 
     @Override
-    public int hashCode() {
-        int hash = 5;
-        hash = 53 * hash + Objects.hashCode(this.name);
-        return hash;
+    public String toString() {
+        return "PrimaryKey{" + "key=" + key + '}';
     }
+    
+    
 
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final PrimaryKey other = (PrimaryKey) obj;
-        if (!Objects.equals(this.name, other.name)) {
-            return false;
-        }
-        return true;
-    }
-    
-    
-    
-    
 }

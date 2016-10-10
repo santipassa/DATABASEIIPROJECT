@@ -1,9 +1,6 @@
-
 package proyectobdii;
 
-import java.sql.Connection;
 import java.sql.DatabaseMetaData;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,40 +12,62 @@ import java.util.List;
 public class Database {
 
     private String name;
-    private Connection conection;
+    private DBConnection connection;
     private List<Table> tableList;
     private List<Procedure> procedureList;
 
-    public Database(String host, String bd, String user, String pwd) {
+    public Database() {
+    }
+
+    public boolean connect(String host, String bd, String user, String pwd) {
         this.name = bd;
         try {
-            Class.forName("com.mysql.jdbc.Driver").newInstance();
-            //conexion = DriverManager.getConnection("jdbc:mysql://"+host+":3306/"+bd,user,pwd);
-            conection = DriverManager.getConnection("jdbc:mysql://localhost:3306/RioCuartoCamping", "root", "root");
-            tableList = new ArrayList<Table>();
-            procedureList = new ArrayList<Procedure>();
-            DatabaseMetaData md = conection.getMetaData();
-            ResultSet rs = md.getTables(null, null, bd, null);
+            
+            tableList = new ArrayList<>();
+            procedureList = new ArrayList<>();
+            this.connection = new DBConnection(host,bd,user,pwd);
+            
+            DatabaseMetaData md = this.connection.getConnection().getMetaData();
+            
+            ResultSet rs = md.getTables(null, bd, null, null);
             while (rs.next()) {
-                tableList.add(new Table(this,rs.getString("TABLE_NAME")));
+                Table t = new Table(this.connection, rs.getString("TABLE_NAME"));
+                tableList.add(t);
             }
             rs = md.getProcedures(null, this.name, null);
             while (rs.next()) {
-                procedureList.add(new Procedure(rs.getString("PROCEDURE_NAME")));
+                procedureList.add(new Procedure(connection, rs.getString("PROCEDURE_NAME")));
             }
-            
-            
+            return true;
+
         } catch (Exception e) {
-
+            
+            return false;
         }
+
     }
 
-    public Connection getConection() {
-        return conection;
+    @Override
+    public String toString() {
+        String table ="";
+        String procedure="";
+        for (Table t : this.tableList) {
+            table=t.toString()+" "+table;
+            
+        }
+        for (Procedure p : this.procedureList) {
+            procedure=p.toString()+" "+procedure;
+        }
+        return "Database{" + "name=" + name +" "+table+" "+procedure+ '}';
     }
-
-    public void setConection(Connection conection) {
-        this.conection = conection;
+    
+    public int getTableCount(){
+        return this.tableList.size();
     }
+    
+    public int getProcedureCount(){
+        return this.procedureList.size();
+    }
+    
 
 }
