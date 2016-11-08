@@ -1,0 +1,41 @@
+===DATABASE COMPARATOR 1.0===
+
+---------------------------------------
+|EJECUCION                            |
+---------------------------------------
+
+java -jar dbc-1.0.jar <path archivo configuracion> <path archivo salida>
+
+---------------------------------------
+|FORMATO DEL ARCHIVO DE CONFIGURACION |
+---------------------------------------
+
+#PARAMETROS DE CONEXION DE LA DB1
+host_1=<hostname>
+schema_1=<schema>
+user_1=<usr>
+pass_1=<pass>
+#PARAMETROS DE CONEXION DE LA DB2
+host_2=<hostname>
+schema_2=<schema>
+user_2=<usr>
+pass_2=<pass>
+
+---------------------------------------
+|EJEMPLO                              |
+---------------------------------------
+#PARAMETROS DE CONEXION DE LA DB1
+host_1=localhost
+schema_1=ejemplo
+user_1=root
+pass_1=root
+#PARAMETROS DE CONEXION DE LA DB2
+host_2=200.7.141.125
+schema_2=otro_schema
+user_2=root
+pass_2=root
+
+GUARDADO EN /home/santiago/Escritorio/cfg.properties
+
+
+java -jar dbc-1.0.jar /home/santiago/Escritorio/cfg.properties /home/santiago/Escritorio/output.txt

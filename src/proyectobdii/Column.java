@@ -31,7 +31,16 @@ class Column {
     }
 
     public boolean equals(Column c) {
+        if(!this.name.equals(c.getName())){
+            Comparator.addDiff( new Diff("Different column name",this.name,c.getName()));
+        
+        }
+        if(!this.type.equals(c.getType())){
+            Comparator.addDiff( new Diff("Different column type",this.type,c.getType()));
+        
+        }
         return (this.name.equals(c.getName()) && this.type.equals(c.getType()));
+        
     }
 
     @Override

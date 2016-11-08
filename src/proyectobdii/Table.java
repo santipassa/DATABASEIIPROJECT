@@ -71,11 +71,7 @@ class Table {
             PreparedStatement query = dbc.getConnection().prepareStatement(sql);
             query.setString(1, c.getBd());
             query.setString(2, this.name);
-            if(this.name.equals("Articulos")){
-                
-                System.out.println(query.toString());
             
-            }
             ResultSet triggers = query.executeQuery();
             
             while (triggers.next()) {
@@ -139,28 +135,60 @@ class Table {
                 && (this.foreignKeyList.size() == t.getForeignKeyList().size())
                 && (this.primaryKeyList.size() == t.getPrimaryKeyList().size())
                 && (this.triggerList.size() == t.getTriggerList().size());
+        if(!this.name.equals(t.getName())){
+           Comparator.addDiff( new Diff("Different table names",this.name,t.getName()));
+       
+       }
+         if(this.foreignKeyList.size() != t.getForeignKeyList().size()){
+           Comparator.addDiff( new Diff("Different number of foreign keys",this.foreignKeyList.size(),t.getForeignKeyList().size()));
+       
+       }
+        if(this.primaryKeyList.size() != t.getPrimaryKeyList().size()){
+           Comparator.addDiff( new Diff("Different number of primary keys",this.primaryKeyList.size(),t.getPrimaryKeyList().size()));
+       
+       }
+        
+        
+        
+        
         if (result) {
             if (this.columnList.size() == t.getColumnList().size()) {
                 for (int i = 0; i < this.columnList.size(); i++) {
-                    result = this.columnList.get(i).equals(t.getColumnList().get(i)) && result;
+                     if(!this.columnList.get(i).equals(t.getColumnList().get(i))){
+                        Comparator.addDiff( new Diff("Different columns",this.columnList.get(i),t.getColumnList().get(i)));
+                        result = false && result;
+                    }
+                    
                 }
             }
 
             if (this.foreignKeyList.size() == t.getForeignKeyList().size()) {
-                for (int i = 0; i < this.columnList.size(); i++) {
-                    result = this.foreignKeyList.get(i).equals(t.getForeignKeyList().get(i)) && result;
+                for (int i = 0; i < this.foreignKeyList.size(); i++) {
+                    if(!this.foreignKeyList.get(i).equals(t.getForeignKeyList().get(i))){
+                        Comparator.addDiff( new Diff("Different foreign keys",this.foreignKeyList.get(i),t.getForeignKeyList().get(i)));
+                        result = false && result;
+                    }
+                  
                 }
             }
 
             if (this.primaryKeyList.size() == t.getPrimaryKeyList().size()) {
-                for (int i = 0; i < this.columnList.size(); i++) {
-                    result = this.primaryKeyList.get(i).equals(t.getPrimaryKeyList().get(i)) && result;
+                for (int i = 0; i < this.primaryKeyList.size(); i++) {
+                    if(!this.primaryKeyList.get(i).equals(t.getPrimaryKeyList().get(i))){
+                        Comparator.addDiff( new Diff("Different primary keys",this.primaryKeyList.get(i),t.getPrimaryKeyList().get(i)));
+                        result = false && result;
+                    }
+                    
                 }
             }
 
             if (this.triggerList.size() == t.getTriggerList().size()) {
-                for (int i = 0; i < this.columnList.size(); i++) {
-                    result = this.triggerList.get(i).equals(t.getTriggerList().get(i)) && result;
+                for (int i = 0; i < this.triggerList.size(); i++) {
+                    if(!this.triggerList.get(i).equals(t.getTriggerList().get(i))){
+                        Comparator.addDiff( new Diff("Different triggers",this.triggerList.get(i),t.getTriggerList().get(i)));
+                        result = false && result;
+                    }
+                    
                 }
             }
         }

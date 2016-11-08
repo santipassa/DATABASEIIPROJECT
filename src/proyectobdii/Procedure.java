@@ -37,13 +37,23 @@ class Procedure {
     public boolean equals(Procedure p) {
         boolean result;
         result = this.name.equals(p.getName()) && (this.paramList.size() == p.getParamList().size());
-        if (result) {
+        if(!this.name.equals(p.getName())){
+            Comparator.addDiff( new Diff("Different procedure",this.name,p.getName()));
+        }
+        if(this.paramList.size() != p.getParamList().size()){
+            Comparator.addDiff( new Diff("Different number of params",this.paramList.size(),this.paramList.size()));
+        }
+        
             if (this.paramList.size() == p.getParamList().size()) {
                 for (int i = 0; i < this.paramList.size(); i++) {
-                    result = this.paramList.get(i).equals(p.getParamList().get(i)) && result;
+                    if(!this.paramList.get(i).equals(p.getParamList().get(i))){
+                        Comparator.addDiff( new Diff("Different params",this.paramList.get(i),p.getParamList().get(i)));
+                        result = false && result;
+                    }
+                    
                 }
             }
-        }
+        
 
         return result;
 
